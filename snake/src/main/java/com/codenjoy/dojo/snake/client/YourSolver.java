@@ -47,59 +47,10 @@ public class YourSolver implements Solver<Board> {
 
     Direction doSolve(Board board) {
         this.board = board;
-
-        List<Point> boardSnake = board.getSnake();
-        List<Point> walls = board.getWalls();
-        boardSnake.addAll(walls);
-        boardSnake.add(board.getStones().get(0));
         LeeApp leeApp = new LeeApp();
-
-
-        List<PointM> obstacles1 = custPointList(boardSnake); // obstacles
-
-        PointM src = custPoint(board.getHead());             // head
-        PointM dst = custPoint(board.getApples().get(0));   // apple
-        // optimal
-//        int maxSnake = 38;
-//        int redirectStone = 29;
-
-        int maxSnake = 42;
-        int redirectStone = 30;
-
-
-        int countWaysHaveToBeApplied = 1;
-        PointM nextStep = leeApp.doSolve(src, dst, obstacles1);      // next point if trace exist
-        System.out.println(nextStep + "NEXT ");
-        int count = 0;
-
-        if (null != nextStep) count = leeApp.countCorners(nextStep, obstacles1);
-        if ((null != nextStep) && (board.getSnake().size() < maxSnake) && (count > countWaysHaveToBeApplied)) {
-            return nextPointDirection(nextStep);     // to apple
-        }
-        PointM stone = custPoint(board.getStones().get(0));
-        obstacles1.remove(stone);
-        if ((board.getSnake().size() > redirectStone)) {        // to stone
-            nextStep = leeApp.doSolve(src, stone, obstacles1);
-            if (null != nextStep) {
-                count = leeApp.countCorners(nextStep, obstacles1);
-                if (count > countWaysHaveToBeApplied) return nextPointDirection(nextStep);
-            }
-        }
-        return nextPointDirection(nextStepCheck(leeApp, obstacles1, countWaysHaveToBeApplied));
+        return leeApp.nextPoint(board);
     }
 
-    public PointM nextStepCheck(LeeApp leeApp, List<PointM> obstacles1, int count) {
-        List<PointM> nextStep = neighboursEmpty(obstacles1);
-        if (nextStep.isEmpty()) return hitYourself();
-        return chooseWay(leeApp, nextStep, obstacles1, count);
-    }
-
-    public PointM chooseWay(LeeApp leeApp, List<PointM> way, List<PointM> obstacles, int count) {
-        for (PointM point : way) {
-            if (leeApp.countCorners(point, obstacles) >= way.size() - (count-1)) return point;
-        }
-        return chooseWay(leeApp, way, obstacles, ++count);
-    }
 
 
     public static void main(String[] args) {
@@ -112,50 +63,7 @@ public class YourSolver implements Solver<Board> {
 
     }
 
-    public PointM custPoint(Point p) {
-        return new PointM(p.getX(), p.getY());
-    }
 
-    public List<PointM> custPointList(List<Point> list) {
-        return list.stream().map(this::custPoint).collect(Collectors.toList());
-    }
-
-    public Direction nextPointDirection(PointM nextStep) {
-        if (board.getHead().getX() > nextStep.getX()) return Direction.LEFT;
-        if (board.getHead().getX() < nextStep.getX()) return Direction.RIGHT;
-        if (board.getHead().getY() < nextStep.getY()) return Direction.UP;
-        else return Direction.DOWN;
-
-    }
-
-
-    private Supplier<Stream<PointM>> deltas() {
-        return () -> Stream.of(
-                // actually just dx, dy
-                PointM.of(-1, 0),
-                PointM.of(0, -1),
-                PointM.of(1, 0),
-                PointM.of(0, 1)
-        );
-    }
-
-
-    private List<PointM> neighboursEmpty(List<PointM> obstacles) {  // change to list
-        System.out.println("neighboursEmpty check");
-        PointM stone = custPoint(board.getStones().get(0));
-        obstacles.remove(stone);
-        List<PointM> exit = deltas().get()
-                .map(d -> custPoint(board.getHead()).move(d.getX(), d.getY()))
-                .collect(Collectors.toList());
-        return exit.stream().filter(p -> !obstacles.contains(p)).collect(Collectors.toList());
-    }
-
-
-    public PointM hitYourself() {
-        System.out.println("hit yourself");
-        System.out.println(board.getSnake().get(1));
-        return custPoint(board.getSnake().get(1));
-    }
 
 
 }

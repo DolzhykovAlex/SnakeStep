@@ -107,9 +107,7 @@ public class Lee {
             Attribute a = new Attribute(Ansi.ColorFont.BLUE);
             return Colored.build(" XX", a);
         }
-
         if (path.isEmpty()) return valueF;
-
         if (path.contains(p)) {
             Attribute a = new Attribute(Ansi.ColorFont.RED);
             return Colored.build(valueF, a);
@@ -171,29 +169,6 @@ public class Lee {
         }
         return Optional.of(path);
     }
-
-    public boolean traceCorner(PointM src, PointM dst, List<PointM> obstacles) {
-        initializeBoard(obstacles);
-        // 1. fill the board
-        int[] counter = {START};
-        set(src, counter[0]);
-        counter[0]++;
-        System.out.println("COUNTER " + counter[0]);
-
-
-        boolean found = false;
-        for (Set<PointM> curr = Set.of(src); !(found || curr.isEmpty()); counter[0]++) {
-            Set<PointM> next = curr.stream()
-                    .flatMap(this::neighboursUnvisited)
-                    .collect(Collectors.toSet());
-            next.forEach(p -> set(p, counter[0]));
-            found = next.contains(dst);
-            curr = next;
-        }
-        System.out.println("found: " + found);
-        return found;
-    }
-
 
     public int count(PointM p, List<PointM> obstacles) {
 
